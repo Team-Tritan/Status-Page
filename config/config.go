@@ -3,6 +3,7 @@ package config
 type Config struct {
 	Port     string
 	Sentry   string
+	MongoURI string
 	Services ServicesStruct
 }
 
@@ -19,8 +20,10 @@ type ServiceConfig struct {
 
 func LoadConfig() Config {
 	return Config{
-		Port:   ":3000",
-		Sentry: "https://f9d0e8db7b6dd42f126d144ce3815521@sentry.tritan.dev/14",
+		Port:     ":3000",
+		Sentry:   "https://f9d0e8db7b6dd42f126d144ce3815521@sentry.tritan.dev/14",
+		MongoURI: "mongodb://data.myinfra.lol:27017",
+
 		Services: ServicesStruct{
 			[]ServiceConfig{
 				{
@@ -36,7 +39,7 @@ func LoadConfig() Config {
 					Description: "A remote router in Florida for our ASN that is has Charter as a upstream.",
 				},
 				{
-					Title:       "IXP Router 1",
+					Title:       "IXP Router 1: United States",
 					Hostname:    "kan.lightning.as393577.net",
 					Port:        "179",
 					Description: "Our core internet exchange router, located in Kansas USA.",
