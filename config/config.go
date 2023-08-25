@@ -148,7 +148,7 @@ func LoadConfig() Config {
 				},
 				{
 					Title:       "Customer VM 1",
-					Hostname:    "waltuh.cust.as393577.net",
+					Hostname:    "66.103.134.42",
 					Port:        "22",
 					Description: "A customer VM used for hosting a website.",
 				},
