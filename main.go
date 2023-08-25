@@ -22,17 +22,15 @@ func main() {
 		}
 	}()
 
-	app := fiber.New()
-	config := config.LoadConfig()
+	cfg := config.LoadConfig()
+	Sentry.Init(&cfg)
 
-	Sentry.Init(&config)
+	app := fiber.New()
 	app.Use(Sentry.Middleware())
 	app.Use(router.SetupRoutes(app))
 
-	err := app.Listen(config.Port)
-	if err != nil {
+	if err := app.Listen(cfg.Port); err != nil {
 		sentry.CaptureException(err)
 		panic(err)
 	}
-
 }
