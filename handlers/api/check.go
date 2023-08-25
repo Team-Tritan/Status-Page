@@ -83,6 +83,10 @@ func CheckEndpoint(c *fiber.Ctx) error {
 		services = append(services, service)
 	}
 
+	if len(services) == 0 {
+		return c.JSON([]Check{})
+	}
+
 	sort.Slice(services, func(i, j int) bool {
 		return services[i].Statuses[0].Date.After(services[j].Statuses[0].Date)
 	})

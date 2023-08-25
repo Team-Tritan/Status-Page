@@ -24,7 +24,7 @@ type Check struct {
 
 func Init(cfg config.Config, client *mongo.Client) {
 	for {
-		var checks []Check // Create an array of Check objects
+		var checks []*Check // Change the slice type to []*Check
 
 		for _, service := range cfg.Services.Services {
 			address := fmt.Sprintf("%s:%s", service.Hostname, service.Port)
@@ -40,7 +40,7 @@ func Init(cfg config.Config, client *mongo.Client) {
 			var check *Check
 			for i := range checks {
 				if checks[i].Title == service.Title {
-					check = &checks[i]
+					check = checks[i]
 					break
 				}
 			}
@@ -52,7 +52,7 @@ func Init(cfg config.Config, client *mongo.Client) {
 					Port:        service.Port,
 					Description: service.Description,
 				}
-				checks = append(checks, *check)
+				checks = append(checks, check)
 			}
 
 			check.Statuses = append(check.Statuses, struct {
@@ -70,14 +70,16 @@ func Init(cfg config.Config, client *mongo.Client) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		documents := make([]interface{}, len(checks))
-		for i, check := range checks {
-			documents[i] = check
-		}
+		if len(checks) > 0 {
+			documents := make([]interface{}, len(checks))
+			for i, check := range checks {
+				documents[i] = check
+			}
 
-		_, err := collection.InsertMany(ctx, documents)
-		if err != nil {
-			fmt.Println(err)
+			_, err := collection.InsertMany(ctx, documents)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 
 		time.Sleep(1 * time.Minute)
