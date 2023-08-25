@@ -24,7 +24,7 @@ type Check struct {
 
 func Init(cfg config.Config, client *mongo.Client) {
 	for {
-		var checks []*Check // Change the slice type to []*Check
+		var checks []*Check 
 
 		for _, service := range cfg.Services.Services {
 			address := fmt.Sprintf("%s:%s", service.Hostname, service.Port)
