@@ -37,25 +37,33 @@ func Init(cfg config.Config, client *mongo.Client) {
 				status = "FAIL"
 			}
 
-			check := Check{
-				Title:       service.Title,
-				Hostname:    service.Hostname,
-				Port:        service.Port,
-				Description: service.Description,
-				Statuses: []struct {
-					Status  string
-					Latency string
-					Date    time.Time
-				}{
-					{
-						Status:  status,
-						Latency: fmt.Sprintf("%dms", elapsed),
-						Date:    time.Now(),
-					},
-				},
+			var check *Check
+			for i := range checks {
+				if checks[i].Title == service.Title {
+					check = &checks[i]
+					break
+				}
 			}
 
-			checks = append(checks, check)
+			if check == nil {
+				check = &Check{
+					Title:       service.Title,
+					Hostname:    service.Hostname,
+					Port:        service.Port,
+					Description: service.Description,
+				}
+				checks = append(checks, *check)
+			}
+
+			check.Statuses = append(check.Statuses, struct {
+				Status  string
+				Latency string
+				Date    time.Time
+			}{
+				Status:  status,
+				Latency: fmt.Sprintf("%dms", elapsed),
+				Date:    time.Now(),
+			})
 		}
 
 		collection := client.Database("status-page").Collection("services")
@@ -74,8 +82,4 @@ func Init(cfg config.Config, client *mongo.Client) {
 
 		time.Sleep(1 * time.Minute)
 	}
-}
-
-func StartChecker(cfg config.Config, client *mongo.Client) {
-	go Init(cfg, client)
 }
