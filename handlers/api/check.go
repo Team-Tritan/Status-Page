@@ -19,7 +19,7 @@ type Check struct {
 	Hostname    string
 	Port        string
 	Description string
-	Checks      []struct {
+	Statuses    []struct {
 		Status  string
 		Latency string
 		Date    time.Time
@@ -63,7 +63,7 @@ func CheckEndpoint(c *fiber.Ctx) error {
 		}
 
 		if existingService, ok := serviceMap[service.Title]; ok {
-			if existingService.Checks[0].Date.Before(service.Checks[0].Date) {
+			if existingService.Statuses[0].Date.Before(service.Statuses[0].Date) {
 				serviceMap[service.Title] = service
 			}
 		} else {
@@ -72,8 +72,8 @@ func CheckEndpoint(c *fiber.Ctx) error {
 	}
 
 	for _, service := range serviceMap {
-		sort.Slice(service.Checks, func(i, j int) bool {
-			return service.Checks[i].Date.After(service.Checks[j].Date)
+		sort.Slice(service.Statuses, func(i, j int) bool {
+			return service.Statuses[i].Date.After(service.Statuses[j].Date)
 		})
 	}
 
@@ -84,8 +84,12 @@ func CheckEndpoint(c *fiber.Ctx) error {
 	}
 
 	sort.Slice(services, func(i, j int) bool {
-		return services[i].Checks[0].Date.After(services[j].Checks[0].Date)
+		return services[i].Statuses[0].Date.After(services[j].Statuses[0].Date)
 	})
+
+	for i, j := 0, len(services)-1; i < j; i, j = i+1, j-1 {
+		services[i], services[j] = services[j], services[i]
+	}
 
 	return c.JSON(services)
 }

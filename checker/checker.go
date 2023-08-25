@@ -15,7 +15,7 @@ type Check struct {
 	Hostname    string
 	Port        string
 	Description string
-	Checks      []struct {
+	Statuses    []struct {
 		Status  string
 		Latency string
 		Date    time.Time
@@ -42,7 +42,7 @@ func Init(cfg config.Config, client *mongo.Client) {
 				Hostname:    service.Hostname,
 				Port:        service.Port,
 				Description: service.Description,
-				Checks: []struct {
+				Statuses: []struct {
 					Status  string
 					Latency string
 					Date    time.Time
