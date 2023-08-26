@@ -6,6 +6,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
+
 	"tritan.dev/status-page/config"
 	"tritan.dev/status-page/database"
 	"tritan.dev/status-page/router"
@@ -15,7 +16,6 @@ import (
 
 func main() {
 	defer handlePanic()
-
 	app := fiber.New()
 	cfg := config.LoadConfig()
 

@@ -195,15 +195,21 @@
         let failedStatusList = $("#failed-status-list");
         failedStatusList.empty();
 
-        failedStatuses.forEach(function (statusInfo) {
-          let listItem = $("<li></li>");
-          listItem.html(
-            `<strong>Service:</strong> ${statusInfo.Service}<br>` +
-              `<strong>Status:</strong> Fail<br>` +
-              `<strong>Date:</strong> ${statusInfo.Date}`
-          );
-          failedStatusList.append(listItem);
-        });
+        if (failedStatuses.length === 0) {
+          $("#show-downtime").text("No offline service(s) history.");
+          $("#failed-status-list").hide();
+          $("#downtime-logs-title").hide();
+        } else {
+          failedStatuses.forEach(function (statusInfo) {
+            let listItem = $("<li></li>");
+            listItem.html(
+              `<strong>Service:</strong> ${statusInfo.Service}<br>` +
+                `<strong>Status:</strong> Fail<br>` +
+                `<strong>Date:</strong> ${statusInfo.Date}`
+            );
+            failedStatusList.append(listItem);
+          });
+        }
       }
 
       $.get("/api/check", function (data) {
