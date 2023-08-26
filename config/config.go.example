@@ -1,0 +1,39 @@
+package config
+
+type Config struct {
+	Port     string
+	Sentry   string
+	MongoURI string
+	Services ServicesStruct
+}
+
+type ServicesStruct struct {
+	Services []ServiceConfig
+}
+
+type ServiceConfig struct {
+	Title       string
+	Hostname    string
+	Port        string
+	Description string
+}
+
+func LoadConfig() Config {
+	return Config{
+		Port:     ":3000",
+		Sentry:   "",
+		MongoURI: "mongodb://mongo.example.com:27017",
+
+		Services: ServicesStruct{
+			[]ServiceConfig{
+				{
+					Title:       "Example Service",
+					Hostname:    "example.as393577.net",
+					Port:        "179",
+					Description: "This is an example service!",
+				},
+	
+			},
+		},
+	}
+}

@@ -1,4 +1,4 @@
-package checker
+package timers
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+
 	"tritan.dev/status-page/config"
 )
 
@@ -24,7 +25,9 @@ type Check struct {
 	}
 }
 
-func Init(cfg config.Config, client *mongo.Client) {
+// Init initializes the timers for checking services and updates the database.
+// It returns an error if any critical error occurs.
+func Init(cfg config.Config, client *mongo.Client) error {
 	var mu sync.Mutex
 
 	for {
@@ -72,7 +75,8 @@ func Init(cfg config.Config, client *mongo.Client) {
 					bson.M{"$set": bson.M{"statuses": existingService.Statuses}},
 				)
 				if err != nil {
-					fmt.Println(err)
+					mu.Unlock()
+					return err
 				}
 			} else {
 				check.Statuses = []struct {
@@ -87,7 +91,8 @@ func Init(cfg config.Config, client *mongo.Client) {
 
 				_, err := collection.InsertOne(ctx, check)
 				if err != nil {
-					fmt.Println(err)
+					mu.Unlock()
+					return err
 				}
 			}
 

@@ -2,16 +2,12 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"tritan.dev/status-page/config"
 )
 
 type Check struct {
@@ -27,31 +23,28 @@ type Check struct {
 }
 
 func CheckEndpoint(c *fiber.Ctx) error {
-	cfg := config.LoadConfig()
+	db := c.Locals("db").(*mongo.Client)
 
-	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(cfg.MongoURI))
+	serviceMap, err := getServiceMap(db)
 	if err != nil {
 		return err
 	}
 
-	defer func() {
-		if err := client.Disconnect(context.Background()); err != nil {
-			fmt.Println(err)
-		}
-	}()
+	services := getSortedServices(serviceMap)
 
+	return c.JSON(services)
+}
+
+func getServiceMap(db *mongo.Client) (map[string]Check, error) {
 	serviceMap := make(map[string]Check)
 
-	collection := client.Database("status-page").Collection("services")
+	collection := db.Database("status-page").Collection("services")
 	cursor, err := collection.Find(context.Background(), bson.M{})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-				"error":   "true",
-				"message": "No data found",
-			})
+			return serviceMap, nil
 		}
-		return err
+		return nil, err
 	}
 
 	defer cursor.Close(context.Background())
@@ -59,7 +52,7 @@ func CheckEndpoint(c *fiber.Ctx) error {
 	for cursor.Next(context.Background()) {
 		var service Check
 		if err := cursor.Decode(&service); err != nil {
-			return err
+			return nil, err
 		}
 
 		if existingService, ok := serviceMap[service.Title]; ok {
@@ -71,20 +64,21 @@ func CheckEndpoint(c *fiber.Ctx) error {
 		}
 	}
 
+	return serviceMap, nil
+}
+
+func getSortedServices(serviceMap map[string]Check) []Check {
+	var services []Check
+
 	for _, service := range serviceMap {
 		sort.Slice(service.Statuses, func(i, j int) bool {
 			return service.Statuses[i].Date.After(service.Statuses[j].Date)
 		})
-	}
-
-	var services []Check
-
-	for _, service := range serviceMap {
 		services = append(services, service)
 	}
 
 	if len(services) == 0 {
-		return c.JSON([]Check{})
+		return []Check{}
 	}
 
 	sort.Slice(services, func(i, j int) bool {
@@ -95,5 +89,5 @@ func CheckEndpoint(c *fiber.Ctx) error {
 		services[i], services[j] = services[j], services[i]
 	}
 
-	return c.JSON(services)
+	return services
 }

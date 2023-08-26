@@ -10,7 +10,7 @@ import (
 	"tritan.dev/status-page/config"
 )
 
-func Connect() (*mongo.Client, error) {
+func Init() (*mongo.Client, error) {
 	uri := config.LoadConfig().MongoURI
 
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(uri))
