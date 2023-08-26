@@ -2,12 +2,14 @@ module tritan.dev/status-page
 
 go 1.21.0
 
-require go.mongodb.org/mongo-driver v1.12.1
+require (
+	github.com/getsentry/sentry-go v0.23.0
+	github.com/gofiber/fiber/v2 v2.48.0
+	go.mongodb.org/mongo-driver v1.12.1
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/getsentry/sentry-go v0.23.0 // indirect
-	github.com/gofiber/fiber/v2 v2.48.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
