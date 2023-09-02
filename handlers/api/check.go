@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -31,7 +31,7 @@ func CheckEndpoint(c *fiber.Ctx) error {
 		return err
 	}
 
-	services := getSortedServices(serviceMap, 20)
+	services := getSortedServices(serviceMap)
 	return c.JSON(services)
 }
 
@@ -67,7 +67,7 @@ func getServiceMap(db *mongo.Client) (map[string]Check, error) {
 	return serviceMap, nil
 }
 
-func getSortedServices(serviceMap map[string]Check, limit int) []Check {
+func getSortedServices(serviceMap map[string]Check) []Check {
 	var services []Check
 
 	for _, service := range serviceMap {
@@ -85,10 +85,9 @@ func getSortedServices(serviceMap map[string]Check, limit int) []Check {
 		return services[i].Statuses[0].Date.After(services[j].Statuses[0].Date)
 	})
 
-	if limit > len(services) {
-		limit = len(services)
+	for i, j := 0, len(services)-1; i < j; i, j = i+1, j-1 {
+		services[i], services[j] = services[j], services[i]
 	}
 
-	return services[:limit]
+	return services
 }
-
