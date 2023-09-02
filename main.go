@@ -40,6 +40,8 @@ func main() {
 
 	app.Use(Sentry.Middleware())
 
+	app.Static("/static", "./public")
+
 	router.SetupRoutes(app)
 
 	err = app.Listen(cfg.Port)
