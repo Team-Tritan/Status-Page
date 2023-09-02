@@ -31,8 +31,7 @@ func CheckEndpoint(c *fiber.Ctx) error {
 		return err
 	}
 
-	services := getSortedServices(serviceMap)
-
+	services := getSortedServices(serviceMap, 20)
 	return c.JSON(services)
 }
 
@@ -68,7 +67,7 @@ func getServiceMap(db *mongo.Client) (map[string]Check, error) {
 	return serviceMap, nil
 }
 
-func getSortedServices(serviceMap map[string]Check) []Check {
+func getSortedServices(serviceMap map[string]Check, limit int) []Check {
 	var services []Check
 
 	for _, service := range serviceMap {
@@ -86,9 +85,10 @@ func getSortedServices(serviceMap map[string]Check) []Check {
 		return services[i].Statuses[0].Date.After(services[j].Statuses[0].Date)
 	})
 
-	for i, j := 0, len(services)-1; i < j; i, j = i+1, j-1 {
-		services[i], services[j] = services[j], services[i]
+	if limit > len(services) {
+		limit = len(services)
 	}
 
-	return services
+	return services[:limit]
 }
+
