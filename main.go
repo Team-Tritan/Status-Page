@@ -9,8 +9,11 @@ import (
 
 	"tritan.dev/status-page/config"
 	"tritan.dev/status-page/database"
-	"tritan.dev/status-page/router"
+
+	api "tritan.dev/status-page/handlers/api"
+	ui "tritan.dev/status-page/handlers/ui"
 	Sentry "tritan.dev/status-page/sentry"
+	
 	"tritan.dev/status-page/timers"
 )
 
@@ -42,12 +45,19 @@ func main() {
 
 	app.Static("/static", "./public")
 
-	router.SetupRoutes(app)
+	SetupRoutes(app)
 
 	err = app.Listen(cfg.Port)
 	if err != nil {
 		handleError(err)
 	}
+}
+
+func SetupRoutes(app *fiber.App) fiber.Handler {
+	app.Get("/", ui.DisplayUI)
+	app.Get("/api/check", api.CheckEndpoint)
+
+	return nil
 }
 
 func handlePanic() {
